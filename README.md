@@ -1,7 +1,7 @@
 # Sistem-Cerdas-IKN
 
 # Schematic
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikUpdate.png)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/updateskematik.png)
 
 ## Documentation
 
