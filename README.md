@@ -12,7 +12,7 @@
 | `RX` | `Communication Serial` |  `RX`|`TX` |
 | `TX` | `Communication Serial` | `TX` |`RX`|
 | `GND` | `Ground` | `GND` |`GND`|
-| `3.3V` | `VCC` | `LV` | `5V`|
+| `3.3V` | `VCC` | `LV/HV` | `5V`|
 
 
 #### Arduino Mega 2560 Pin Use to Logic Converter
