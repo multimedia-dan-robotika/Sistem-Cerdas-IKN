@@ -7,12 +7,12 @@
 
 #### Lora TTGO T-Beam Pin Use to Logic Converter
 
-| PIN Lora | Type     | Pin Logic Converter           |
-| :-------- | :------- | :------------------------- |
-| `RX` | `Communication Serial` |  `RX`|
-| `TX` | `Communication Serial` | `TX` |
-| `GND` | `Ground` | `GND` |
-| `3.3V` | `VCC` | `LV` |
+| PIN Lora | Type     | Pin Logic Converter           | Pin Mega| 
+| :-------- | :------- | :------------------------- |  :------- |
+| `RX` | `Communication Serial` |  `RX`|`TX` |
+| `TX` | `Communication Serial` | `TX` |`RX`|
+| `GND` | `Ground` | `GND` |`GND`|
+| `3.3V` | `VCC` | `LV` | `HV`|`5v`|
 
 
 #### Arduino Mega 2560 Pin Use to Logic Converter
