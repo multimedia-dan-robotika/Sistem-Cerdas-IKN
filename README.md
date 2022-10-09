@@ -1,7 +1,7 @@
 # Sistem-Cerdas-IKN
 
 # Schematic
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/updateskematik.png)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/SkematikSmartFarm.png)
 
 ## Documentation
 
@@ -13,15 +13,6 @@
 | `TX` | `Communication Serial` | `TX` |`RX`|
 | `GND` | `Ground` | `GND` |`GND`|
 | `3.3V` | `VCC` | `LV/HV` | `5V`|
-
-
-#### Arduino Mega 2560 Pin Use to Logic Converter
-| PIN Lora | Type     | Pin Logic Converter           |
-| :-------- | :------- | :------------------------- |
-| `RX` | `Communication Serial` |  `TX`|
-| `TX` | `Communication Serial` | `RX` |
-| `GND` | `Ground` | `GND` |
-| `5V` | `VCC` | `HV` |
 
 
 #### Example Receiver arduino Mega -> Logic Converter <- Lora TTGO
