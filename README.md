@@ -1,7 +1,7 @@
 # Sistem-Cerdas-IKN
 
 # Schematic
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/SkematikSmartFarm.png)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdate.png)
 
 ## Documentation
 
