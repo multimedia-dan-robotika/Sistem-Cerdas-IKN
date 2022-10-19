@@ -16,7 +16,7 @@
 // 433E6 for Asia
 // 866E6 for Europe
 // 915E6 for North America
-#define BAND 866E6
+#define BAND 915E6
 
 // OLED pins
 #define OLED_SDA 21
@@ -30,8 +30,7 @@
 // int humidityValue;
 // int humidityRead;
 String humidityString;
-const int AirValue = 790;   // you need to replace this value with Value_1
-const int WaterValue = 390; // you need to replace this value with Value_2
+// you need to replace this value with Value_2
 const int SensorPin = A0;
 int soilMoistureValue = 0;
 int soilmoisturepercent = 0;
@@ -50,8 +49,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 void setup()
 {
   Serial.begin(115200);
+  //  pinMode(humidityPin, INPUT_PULLUP);
   pinMode(OLED_RST, OUTPUT);
-  // pinMode(humidityPin, INPUT);
+  pinMode(humidityPin, INPUT);
   digitalWrite(OLED_RST, LOW);
   delay(20);
   digitalWrite(OLED_RST, HIGH);
@@ -69,7 +69,7 @@ void setup()
   display.setTextColor(WHITE);
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.print("LORA SENDER ");
+  display.print("LORA Area A");
   display.display();
 
   Serial.println("LoRa Sender Test");
@@ -84,34 +84,31 @@ void setup()
       ;
   }
   Serial.println("LoRa Initializing OK!");
-//  display.setCursor(0, 10);
-//  display.print("LoRa Initializing OK!");
-//  display.display();
-////  delay(2000);
 }
 
 void loop()
 {
-
+  int rssi = LoRa.rssi();
   soilMoistureValue = analogRead(humidityPin); // put Sensor insert into soil
   Serial.println(soilMoistureValue);
-  soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
+  soilmoisturepercent = map(soilMoistureValue,  0, 4095, 100, 0);
   LoRa.beginPacket();
   LoRa.print(soilmoisturepercent);
   LoRa.print('#');
+  LoRa.print(rssi);
+  LoRa.print('#');
   LoRa.endPacket();
-  
-  Serial.print(soilmoisturepercent);
-  Serial.println("%");
-  
-  display.setCursor(45,0);  //oled display
+
+//  oled display
+  display.setCursor(45,0); 
   display.setTextSize(2);
   display.setTextColor(WHITE);
   display.println("Soil");
-  display.setCursor(20,15);  
+  display.setCursor(20,15);
   display.setTextSize(2);
   display.setTextColor(WHITE);
   display.println("Moisture");
+    
   display.setCursor(30,40);  //oled display
   display.setTextSize(3);
   display.setTextColor(WHITE);
@@ -120,33 +117,41 @@ void loop()
   display.setTextSize(3);
   display.println(" %");
   display.display();
-  
   display.clearDisplay();
-  delay(1000);
-}
-void lcdLora()
-{
-  int rssi = LoRa.rssi();
 
-  // Send LoRa packet to receiver
-//  LoRa.beginPacket();
-//  LoRa.print(humidityValue);
-//  LoRa.print('#');
-//  LoRa.print(rssi);
-//  LoRa.print('#');
-//  LoRa.endPacket();
-
-//  display.clearDisplay();
-//  display.setCursor(0, 0);
-//  display.println("LORA SENDER");
-//  display.setCursor(0, 20);
-//  display.setTextSize(1);
-//  display.display();
-//  display.print("LoRa packet sent.");
-//  display.setCursor(0, 30);
-//  display.print("Soil Moisture:");
-//  display.setCursor(30, 40);
-//  display.print(humidityValue);
-//  display.print(rssi);
-//  display.display();
+  if (soilmoisturepercent >= 0 && soilmoisturepercent <= 100)
+  {
+    Serial.print(soilmoisturepercent);
+    Serial.println("%");
+    if (soilmoisturepercent >= 0 && soilmoisturepercent <= 40) {
+      Serial.println("Kering");
+      display.setCursor(20, 0); //oled display
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println(soilmoisturepercent);
+      display.clearDisplay();
+    }
+    else if (soilmoisturepercent >= 40 && soilmoisturepercent <= 39) {
+      Serial.println("Normal");
+      Serial.print(soilmoisturepercent);
+      Serial.println("%");
+//      oled display
+      display.setCursor(20, 0); 
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println(soilmoisturepercent);
+      display.clearDisplay();
+    }
+    else if (soilmoisturepercent >= 51 && soilmoisturepercent <= 100) {
+      Serial.println("Basah");
+      Serial.print(soilmoisturepercent);
+      Serial.println("%");
+//      oled display
+      display.setCursor(20, 0);
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println(soilmoisturepercent);
+      display.clearDisplay();
+    }
+  }
 }
