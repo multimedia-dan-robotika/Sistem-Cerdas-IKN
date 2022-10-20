@@ -4,7 +4,6 @@
 #define IN1_Atas 4
 #define IN2_Bawah 3
 #define IN1_Bawah  2
-///////////////////////////////////////////
 
 const byte WL1=8;
 const byte WL2=9;
@@ -22,6 +21,7 @@ void setup() {
   pinMode(IN1_Atas, OUTPUT);
   pinMode(IN2_Bawah, OUTPUT);
   pinMode(IN1_Bawah, OUTPUT);
+  
 /////////////////input water level///////////////
   pinMode(8, INPUT);
   pinMode(9, INPUT);
@@ -40,7 +40,7 @@ void loop() {
   } else {
     digitalWrite(IN4_Bawah, HIGH);
     Serial.println("HIGH");
-  //////////////////////////////////water level///////////////
+  //////////////////water level///////////////
 
   waterLevelBawah=digitalRead(WL1);
   waterLevelAtas=digitalRead(WL2);
