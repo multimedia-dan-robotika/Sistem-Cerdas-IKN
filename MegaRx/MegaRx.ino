@@ -47,10 +47,10 @@ void loop() {
   datatransfer = dataReciver.toInt();
   Serial.println(datatransfer);
   if (datatransfer >=  0 && datatransfer <= 40){
-  digitalWrite(relay1, LOW);
+  digitalWrite(IN1_Bawah, LOW);
   Serial.println("Melakukan Penyiraman");
 } else {
-  digitalWrite(relay1, LOW);
+  digitalWrite(IN1_Bawah, LOW);
   Serial.println("Tidak Melakukan Penyiraman ");
 } delay(1000);
 
@@ -87,10 +87,14 @@ void rtcSystem(){
   if (t.hour == onHour && t.min == onMin)
   {
     //Menyalakan Sistem
+     digitalWrite(IN1_Bawah, LOW);
+  Serial.println("Melakukan Penyiraman");
   }
   else if (t.hour == offHour && t.min == offMin)
   {
     //Mematikan Sistem
+     digitalWrite(IN1_Bawah, LOW);
+  Serial.println("Tidak Melakukan Penyiraman ");
   }
   Serial.print(t.hour, DEC);
   Serial.print(" hour(s), ");
