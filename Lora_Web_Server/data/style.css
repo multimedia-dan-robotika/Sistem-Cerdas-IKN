@@ -1,0 +1,79 @@
+/* CSS Costume */
+
+html {
+  font-family: Arial, Helvetica, sans-serif;
+  /* display: inline-block;  */
+  text-align: center;
+  display: contents;
+}
+
+nav .top-nav {
+  align-items: center;
+  color: aliceblue;
+}
+
+canvas {
+  margin-left: 5%;
+}
+
+footer {
+  margin-top: auto;
+  background-color: #034078;
+  /* position: fixed; */
+  align-items: center;
+  padding-bottom: 1%;
+}
+
+.foot-text {
+  font-size: medium;
+  padding-top: 1%;
+  font-family: 'Courier New', Courier, monospace;
+  color: aliceblue;
+}
+
+body {
+  margin: 0;
+}
+
+.jumbotron-fuild {
+  padding-top: 2em;
+}
+
+.card {
+  background-color: white;
+  box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+  padding-bottom: 5%;
+  align-items: center;
+}
+
+.card-title {
+  padding-top: 1%;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #034078
+}
+
+/* Mobile */
+
+@media only screen and (max-width: 600px) {
+  .card-grid-1 {
+
+    /* margin:auto;  */
+    display: contents;
+    grid-gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .card-title {
+    padding-top: 5%;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #034078
+  }
+
+  .card {
+    margin-top: 10%;
+    background-color: transparent;
+    padding-bottom: 5%;
+  }
+}
