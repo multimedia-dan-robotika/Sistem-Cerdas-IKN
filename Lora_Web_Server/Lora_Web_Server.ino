@@ -1,3 +1,16 @@
+/*
+    Serial Value 1 = AREA
+    Serial Value 2 = MOISTURE PERCENT
+*/
+
+/*
+    LoRa Value 1 = AREA
+    LoRa Value 2 = MOISTURE PERCENT
+    LoRa Value 3 = pH (0-14)
+    LoRa Value 4 = NITROGEN (MG/KG)
+    LoRa Value 5 = PHOSPHORUS (MG/KG)
+    LoRa Value 6 = KALIUM/POTASSIUM (MG/KG)
+*/
 #include "SPIFFS.h"
 
 #include <SPI.h>
@@ -13,14 +26,12 @@
 #include <ESPAsyncWebServer.h>
 #include <Arduino_JSON.h>
 #include <elapsedMillis.h>
+
 IPAddress local_IP(192, 168, 4, 22);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-const char *ssid = "Smart Monitor";
-const char *password = "PPURSTUG";
-
-// define the pins used by the LoRa transceiver module
+#define BAND 915E6
 #define SCK 5
 #define MISO 19
 #define MOSI 27
@@ -28,49 +39,50 @@ const char *password = "PPURSTUG";
 #define RST 14
 #define DIO0 26
 
-// 433E6 for Asia
-// 866E6 for Europe
-// 915E6 for North America
-#define BAND 915E6
-
-// OLED pins
 #define OLED_SDA 21
 #define OLED_SCL 22
 #define OLED_RST 16
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
 
-/* LoRa to Nano interface
-   VCC      3V3
-   GND      GND
-   MISO     D12
-   MOSI     D11
-   SCK      D13
-   NSS/CS   D10
-   RESET    D9
-*/
+const char *ssid = "Smart Monitor";
+const char *password = "PPURSTUG";
+
+elapsedMillis sendMillis;
+elapsedMillis OLEDPrintMillis;
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
+
+unsigned long sendInterval = 2000;
+unsigned long OLEDPrintInterval = 3000;
+
+String target1 = "L1";
+String target2 = "L2";
+String target3 = "L3";
+String target4 = "L4";
+
+byte turn;
+
+String
+    moist1,
+    pH1, nitro1, phos1, kal1,
+    moist2, pH2, nitro2, phos2, kal2,
+    moist3, pH3, nitro3, phos3, kal3,
+    moist4, pH4, nitro4, phos4, kal4;
+
+String area1OLED = "Lahan 1 : ";
+String area2OLED = "Lahan 2 : ";
+String area3OLED = "Lahan 3 : ";
+String area4OLED = "Lahan 4 : ";
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
-
-// variabel global
-String humaditi;
-String rssiRange;
 JSONVar readings;
 elapsedMillis requestMillis;
 elapsedMillis OLEDMillis;
 elapsedMillis serialMillis;
-
 unsigned int requestInterval = 3000;
 unsigned int OLEDInterval = 1000;
 unsigned int serialInterval = 1500;
-
-int rssiValue;
-String moiseRecive;
-int moisturePercent;
-unsigned long lastTime = 0;
-unsigned long timerDelay = 5000;
 
 void initFS()
 {
@@ -84,22 +96,42 @@ void initFS()
 
 String getSensorReadings()
 {
-  readings["moisture"] = String(moisturePercent);
-// readings["moisture_B"] = String(variableSensors); 
-// readings["moisture_C"] = String(variableSensors); 
-// readings["moisture_D"] = String(variableSensors); 
+  readings["kelembabanLahan1FromArduino"] = String(moist1); // edited
+  readings["natriumLahan1FromArduino"] = String(nitro1);
+  readings["potasiumLahan1FromArduino"] = String(phos1);
+  readings["kaliumLahan1FromArduino"] = String(kal1);
+  readings["phLahan1FromArduino"] = String(pH1);
+  // section 2
+  readings["kelembabanLahan2FromArduino"] = String(moist2); // edited
+  readings["natriumLahan2FromArduino"] = String(nitro2);
+  readings["potasiumLahan2FromArduino"] = String(phos2);
+  readings["kaliumLahan2FromArduino"] = String(kal2);
+  readings["phLahan2FromArduino"] = String(pH2);
+  // Section 3
+  readings["kelembabanLahan3FromArduino"] = String(moist3); // edited
+  readings["natriumLahan3FromArduino"] = String(nitro3);
+  readings["potasiumLahan3FromArduino"] = String(phos3);
+  readings["kaliumLahan3FromArduino"] = String(kal3);
+  readings["phLahan3FromArduino"] = String(pH3);
+  // section 4
+  readings["kelembabanLahan4FromArduino"] = String(moist4); // edited
+  readings["natriumLahan4FromArduino"] = String(nitro4);
+  readings["potasiumLahan4FromArduino"] = String(phos4);
+  readings["kaliumLahan4FromArduino"] = String(kal4);
+  readings["phLahan4FromArduino"] = String(pH4);
   String jsonString = JSON.stringify(readings);
   return jsonString;
 }
+
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(15200);
+
   pinMode(OLED_RST, OUTPUT);
   digitalWrite(OLED_RST, LOW);
   delay(20);
   digitalWrite(OLED_RST, HIGH);
 
-  // initialize OLED
   Wire.begin(OLED_SDA, OLED_SCL);
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3c, false, false))
   { // Address 0x3C for 128x32
@@ -107,14 +139,6 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
-
-  display.clearDisplay();
-  display.setTextColor(WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.print("LORA Starting... ");
-  display.display();
-
   // SPI LoRa pins
   SPI.begin(SCK, MISO, MOSI, SS);
   // setup LoRa transceiver module
@@ -136,171 +160,225 @@ void setup()
   Serial.println(IP);
   initFS();
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request)
-  {
-    request->send(SPIFFS, "/index.html", "text/html");
-  });
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(SPIFFS, "/index.html", "text/html"); });
 
   server.serveStatic("/", SPIFFS, "/");
 
-  server.on("/readings", HTTP_GET, [](AsyncWebServerRequest * request)
-  {
+  server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
     String json = getSensorReadings();
     request -> send (200, "application/json", json);
-    json = String();
-  });
+    json = String(); });
 
-  events.onConnect([](AsyncEventSourceClient * client)
-  {
-    client->send("Request -> ", NULL, millis(), 10000);
-  });
+  events.onConnect([](AsyncEventSourceClient *client)
+                   { client->send("Request -> ", NULL, millis(), 10000); });
 
   server.addHandler(&events);
 
   server.begin();
-}
 
+  initLoRa();
+  initOLED();
+
+  turn = 1;
+}
 
 void loop()
 {
+  if (sendMillis >= sendInterval)
+  {
+    if (turn == 1)
+    {
+      sendRequest(target1);
+      turn = 2;
+    }
+    else if (turn == 2)
+    {
+      sendRequest(target2);
+      turn = 3;
+    }
+    else if (turn == 3)
+    {
+      sendRequest(target3);
+      turn = 4;
+    }
+    else if (turn == 4)
+    {
+      sendRequest(target4);
+      turn = 1;
+    }
+    sendMillis = 0;
+  }
 
- display.setCursor(0, 0);
-display.setTextSize(1);
-display.println("Lora Server");
- display.setCursor(0, 10);
-display.setTextSize(1);
-display.println("IP : 192.168.4.1");
-   
+  if (OLEDPrintMillis >= OLEDPrintInterval)
+  {
+    OLEDPrint();
+    OLEDPrintMillis = 0;
+  }
+  if (requestMillis >= requestInterval)
+  {
+    events.send("Success", NULL, 2000);
+    events.send(getSensorReadings().c_str(), "new_readings", 2000);
+    requestMillis = 0;
+  }
+
+  waitResponse();
+}
+
+void initLoRa()
+{
+  SPI.begin(SCK, MISO, MOSI, SS);
+  LoRa.setPins(SS, RST, DIO0);
+  if (!LoRa.begin(BAND))
+  {
+    while (1)
+      ;
+  }
+}
+
+void initOLED()
+{
+  Wire.begin(OLED_SDA, OLED_SCL);
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3c, false, false))
+  {
+    for (;;)
+      ;
+  }
+
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.print("LORA Starting... ");
+  display.display();
+}
+
+void sendRequest(String target)
+{
+  LoRa.beginPacket();
+  LoRa.print(target);
+  LoRa.print("#");
+  LoRa.endPacket();
+}
+
+void OLEDPrint()
+{
+  moistOLED(moist1, 20, area1OLED);
+  moistOLED(moist2, 30, area2OLED);
+  moistOLED(moist3, 40, area3OLED);
+  moistOLED(moist4, 50, area4OLED);
+}
+
+void moistOLED(String msgMoist, int YValue, String areaName)
+{
+  int moisturePercent = msgMoist.toInt();
+  if (moisturePercent >= 0 && moisturePercent <= 100)
+  {
+    Serial.println(moisturePercent);
+    if (moisturePercent >= 0 && moisturePercent <= 40)
+    {
+      //      Serial.println(moisturePercent);
+      display.setCursor(0, YValue);
+      display.setTextSize(1);
+      display.println(areaName);
+      display.setCursor(50, YValue);
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println("KERING");
+      display.display();
+      display.clearDisplay();
+    }
+    else if (moisturePercent >= 40 && moisturePercent <= 50)
+    {
+      display.setCursor(0, YValue);
+      display.setTextSize(1);
+      display.println(areaName);
+      display.setCursor(50, YValue);
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println("NORMAL");
+      display.display();
+      display.clearDisplay();
+    }
+    else if (moisturePercent >= 51 && moisturePercent <= 100)
+    {
+      display.setCursor(0, YValue);
+      display.setTextSize(1);
+      display.println(areaName);
+      display.setCursor(50, YValue);
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.println("BASAH");
+      display.display();
+      display.clearDisplay();
+    }
+  }
+}
+
+void waitResponse()
+{
+  String area, moist, pH, nitro, phos, kal;
   int packetSize = LoRa.parsePacket();
   if (packetSize)
   {
-
-    // read packet
     while (LoRa.available())
     {
-      //      LoRaData = LoRa.readString();
-      moiseRecive = LoRa.readStringUntil('#');
-      rssiRange = LoRa.readStringUntil('#');
-    }
-    moisturePercent = moiseRecive.toInt();
-  }
-  if (OLEDMillis >= OLEDInterval)
-  {
-
-    area_A();
-   
-
-    //    end millis
-    OLEDMillis = 0;
-        display.clearDisplay();
-  }
-
-  if (serialMillis >= serialInterval)
-  {
-//    Serial.println(moisturePercent);
-    serialMillis = 0;
-  }
-
-  if (requestMillis >= requestInterval)
-  {
-    events.send("Success", NULL, 3000);
-    events.send(getSensorReadings().c_str(), "new_readings", 3000);
-    requestMillis = 0;
-  }
-}
-
-
-void area_A() {
-  if (moisturePercent >= 0 && moisturePercent <= 100)
-  {
-  Serial.println(moisturePercent);
-
-    if (moisturePercent >= 0 && moisturePercent <= 40) {
-      display.setCursor(0, 20);
-      display.setTextSize(1);
-display.println("Lahan 1 : ");
-      display.setCursor(50, 20);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Kering");
-
-
-      display.display();
-      display.clearDisplay();
-    }
-    else if (moisturePercent >= 40 && moisturePercent <= 50) {
-      display.setCursor(0, 20);
-      display.setTextSize(1);
-display.println("Lahan 1 : ");
-      display.setCursor(50, 20);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Normal");
-
-
-      display.display();
-      display.clearDisplay();
-    }
-    else if (moisturePercent >= 51 && moisturePercent <= 100) {
-      display.setCursor(0, 20);
-      display.setTextSize(1);
-      display.println("Lahan 1 : ");
-      display.setCursor(50, 20);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Basah");
-
-
-      display.display();
-      display.clearDisplay();
+      area = LoRa.readStringUntil('#');
+      moist = LoRa.readStringUntil('#');
+      pH = LoRa.readStringUntil('#');
+      nitro = LoRa.readStringUntil('#');
+      phos = LoRa.readStringUntil('#');
+      kal = LoRa.readStringUntil('#');
+      sensorSend(area, moist, pH, nitro, phos, kal);
     }
   }
 }
 
-void area_B() {
-  if (moisturePercent >= 0 && moisturePercent <= 100)
+void sensorSend(String field, String sensor1, String sensor2, String sensor3, String sensor4, String sensor5)
+{
+  if (field == target1)
   {
-
-    Serial.print(moisturePercent);
-    Serial.println("%");
-    if (moisturePercent >= 0 && moisturePercent <= 40) {
-      display.setCursor(0, 30);
-      display.setTextSize(1);
-      display.println("Area B : ");
-      display.setCursor(50, 30);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Kering");
-
-
-      display.display();
-      display.clearDisplay();
-    }
-    else if (moisturePercent >= 40 && moisturePercent <= 50) {
-      display.setCursor(0, 30);
-      display.setTextSize(1);
-      display.println("Area B : ");
-      display.setCursor(50, 30);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Normal");
-
-
-      display.display();
-      display.clearDisplay();
-    }
-    else if (moisturePercent >= 51 && moisturePercent <= 100) {
-      display.setCursor(0, 30);
-      display.setTextSize(1);
-      display.println("Area B : ");
-      display.setCursor(50, 30);
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.println("Basah");
-
-
-      display.display();
-      display.clearDisplay();
-    }
+    moist1 = sensor1;
+    pH1 = sensor2;
+    nitro1 = sensor3;
+    phos1 = sensor4;
+    kal1 = sensor5;
+    sendSerial(field, moist1);
   }
+  else if (field == target2)
+  {
+    moist2 = sensor1;
+    pH2 = sensor2;
+    nitro2 = sensor3;
+    phos2 = sensor4;
+    kal2 = sensor5;
+    sendSerial(field, moist2);
+  }
+  else if (field == target3)
+  {
+    moist3 = sensor1;
+    pH3 = sensor2;
+    nitro3 = sensor3;
+    phos3 = sensor4;
+    kal3 = sensor5;
+    sendSerial(field, moist3);
+  }
+  else if (field == target4)
+  {
+    moist4 = sensor1;
+    pH4 = sensor2;
+    nitro4 = sensor3;
+    phos4 = sensor4;
+    kal4 = sensor5;
+    sendSerial(field, moist4);
+  }
+}
+
+void sendSerial(String field, String sensor1)
+{
+  Serial.print(field);
+  Serial.print('#');
+  Serial.print(sensor1);
+  Serial.print('#');
 }
