@@ -80,7 +80,7 @@ char message[] = "29M LstWyPt, 345M StPt, rec#89";
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(4800);
   
   pinMode (OLED_RST, OUTPUT);
   digitalWrite(OLED_RST, LOW);
