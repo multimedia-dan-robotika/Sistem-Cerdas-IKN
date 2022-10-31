@@ -125,7 +125,7 @@ String getSensorReadings()
 
 void setup()
 {
-  Serial.begin(15200);
+  Serial.begin(115200);
 
   pinMode(OLED_RST, OUTPUT);
   digitalWrite(OLED_RST, LOW);
@@ -301,7 +301,7 @@ void moistOLED(String msgMoist, int YValue, String areaName)
       display.display();
       display.clearDisplay();
     }
-    else if (moisturePercent >= 51 && moisturePercent <= 100)
+    else if (moisturePercent >= 80 && moisturePercent <= 100)
     {
       display.setCursor(0, YValue);
       display.setTextSize(1);
