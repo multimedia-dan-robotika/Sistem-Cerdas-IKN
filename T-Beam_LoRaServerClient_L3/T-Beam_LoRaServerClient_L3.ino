@@ -74,9 +74,9 @@ byte NValue, PValue, KValue;
 byte NPKReading = 1;  
 byte LoRaStatus = 0;
 
-String area     = "L4";
-String areaDesc = "LoRa Lahan 4";
-String areaName = "Lahan 4";
+String area     = "L3";
+String areaDesc = "LoRa Lahan 3";
+String areaName = "Lahan 3";
 String msgArea, msgMoist, msgPH, msgNitro, msgPhos, msgKal;
 
 unsigned long readSensorInterval = 10000;
