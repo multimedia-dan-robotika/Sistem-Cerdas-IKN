@@ -4,7 +4,7 @@
 ![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdate.png)
 
 # Schematic Lora Client
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSensors.PNG)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematiksensorUpdate.PNG)
 
 ## Documentation
 
