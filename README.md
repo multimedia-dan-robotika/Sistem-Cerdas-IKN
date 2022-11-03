@@ -1,7 +1,7 @@
 # Sistem-Cerdas-IKN
 
 # Schematic Lora Server
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdate.png)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdater.png)
 
 # Schematic Lora Client
 ![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematiksensorUpdate.PNG)
