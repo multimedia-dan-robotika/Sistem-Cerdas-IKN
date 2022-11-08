@@ -1,14 +1,15 @@
 # Sistem-Cerdas-IKN
+Run Website -> 192.168.4.1
 
 # Schematic Lora Server
 ![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdater.png)
 
 # Schematic Lora Client
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematiksensorUpdate.PNG)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/schematicLoraClient.PNG)
 
-## Documentation
+# Documentation
 
-#### Lora TTGO T-Beam Pin Use to Logic Converter <Server>
+## Lora TTGO T-Beam Pin Use to Logic Converter <Server> to <Client>
 
 | PIN Lora | Type     | Pin Logic Converter           | Pin Mega| 
 | :-------- | :------- | :------------------------- |  :------- |
@@ -18,13 +19,13 @@
 | `3.3V` | `VCC` | `LV/HV` | `5V`|
 
 
-#### Example Receiver arduino Mega -> Logic Converter <- Lora TTGO
+## Example Receiver arduino Mega -> Logic Converter <- Lora TTGO
 
 ```c++
   void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  Serial3.begin(115200);
+  Serial3.begin(9600);
 }
 void loop() {
   Serial.println("Message Received: ");
@@ -146,3 +147,4 @@ byte KRead()
 }
 
 ```
+
