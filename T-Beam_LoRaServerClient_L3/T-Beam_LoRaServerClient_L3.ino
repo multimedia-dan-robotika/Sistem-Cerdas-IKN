@@ -206,14 +206,14 @@ void onResponse(String field, String sensor1, String sensor2, String sensor3, St
 void pHRead()
 {
   pHAnalog  = analogRead (pH);
-  pHValue   = -(-0.0693 * pHAnalog )+ 7.3855;
+  pHValue   = (0.002888143 * pHAnalog)-0.50;
   msgPH     = String (pHValue);
 }
 
 void moistRead()
 {
   moistAnalog   = analogRead (soil);
-  moistPercent  = map (moistAnalog, 0, 4095, 100, 0);
+   moistPercent  = map (moistAnalog, 1620, 4095, 100, 0);
   msgMoist      = String (moistPercent);
 }
 
