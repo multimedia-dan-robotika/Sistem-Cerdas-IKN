@@ -10,7 +10,7 @@
   * Data = 4
   * GND = GND
 */
-
+ 
 /*
   * LORA32 to MAX485 
   * VCC = 5V

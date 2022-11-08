@@ -5,11 +5,11 @@ Run Website -> 192.168.4.1
 ![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/skematikSmartFarmupdater.png)
 
 # Schematic Lora Client
-![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/schematicLoraClient.PNG)
+![Logo](https://github.com/multimedia-dan-robotika/Sistem-Cerdas-IKN/blob/main/schematicFinalloraSensors.PNG)
 
 # Documentation
 
-## Lora TTGO T-Beam Pin Use to Logic Converter <Server> to <Client>
+## Lora TTGO T-Beam Pin Use to Logic Converter
 
 | PIN Lora | Type     | Pin Logic Converter           | Pin Mega| 
 | :-------- | :------- | :------------------------- |  :------- |
@@ -30,6 +30,46 @@ Run Website -> 192.168.4.1
 void loop() {
   Serial.println("Message Received: ");
   Serial.println(Serial3.readString());
+```
+## Example SEND packet lora client to Server or other Lora
+```c++
+ LoRa.beginPacket();
+  LoRa.print(soilmoisturepercent);
+  LoRa.print('#');
+  LoRa.print(rssi);
+  LoRa.print('#');
+  LoRa.endPacket();
+```
+## Example RECEIVER packet from lora Client or other Lora
+```c++
+
+ int packetSize = LoRa.parsePacket();
+  if (packetSize)
+  {
+    while (LoRa.available())
+    {
+      area = LoRa.readStringUntil('#');
+      moist = LoRa.readStringUntil('#');
+      pH = LoRa.readStringUntil('#');
+      nitro = LoRa.readStringUntil('#');
+      phos = LoRa.readStringUntil('#');
+      kal = LoRa.readStringUntil('#');
+      sensorSend(area, moist, pH, nitro, phos, kal);
+    }
+  }
+```
+## Example Lora Web Server
+Reading data from sensor and change data tipe from integer to String
+```c++
+String getSensorReadings()
+{
+  readings["kelembabanLahan1FromArduino"] = String(moist1); // edited
+  readings["natriumLahan1FromArduino"] = String(nitro1);
+  readings["potasiumLahan1FromArduino"] = String(phos1);
+  readings["kaliumLahan1FromArduino"] = String(kal1);
+  readings["phLahan1FromArduino"] = String(pH1);
+   String jsonString = JSON.stringify(readings);
+  return jsonString;
 ```
 
 ## Rumus pH Tanah
