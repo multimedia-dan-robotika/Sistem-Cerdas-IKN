@@ -59,6 +59,12 @@ void loop() {
   }
 ```
 ## Example Lora Web Server
+Using port 80 for running webserver
+```c++
+AsyncWebServer server(80);
+AsyncEventSource events("/events");
+JSONVar readings;
+```
 Reading data from sensor and change data tipe from integer to String
 ```c++
 String getSensorReadings()
@@ -70,6 +76,26 @@ String getSensorReadings()
   readings["phLahan1FromArduino"] = String(pH1);
    String jsonString = JSON.stringify(readings);
   return jsonString;
+```
+example run server and request webserver using SPIFFS and execute file index.html
+```c++
+ server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(SPIFFS, "/index.html", "text/html"); });
+
+  server.serveStatic("/", SPIFFS, "/");
+
+  server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+    String json = getSensorReadings();
+    request -> send (200, "application/json", json);
+    json = String(); });
+
+  events.onConnect([](AsyncEventSourceClient *client)
+                   { client->send("Request -> ", NULL, millis(), 10000); });
+
+  server.addHandler(&events);
+
+  server.begin();
 ```
 
 ## Rumus pH Tanah
