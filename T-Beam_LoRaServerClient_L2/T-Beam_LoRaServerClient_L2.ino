@@ -56,7 +56,7 @@
 
 #define soil        25
 #define pH          4
-#define DE_MAX485   32
+#define DE_MAX485   15 // 32 (change) 
 #define RE_MAX485   33
 
 elapsedMillis readSensorMillis;
