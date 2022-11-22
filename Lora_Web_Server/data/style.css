@@ -107,14 +107,26 @@ input {
 
 .head-des {
   font-weight: bolder;
+  font-size: 130%;
 }
 
 .head-artikel {
-  padding-top: 4%;
+  /* padding-top: %; */
+  font-size: 120%;
   text-align: center;
   font-weight: bolder;
   font-family: sans-serif;
 
+}
+
+.batas {
+  box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+  transition: transform .2s;
+  border-radius: 20px;
+}
+
+.batas:hover {
+  transform: scale(1.01);
 }
 
 .artikel-conten {
@@ -168,7 +180,7 @@ body {
 .card-info {
   transition: transform .2s;
   /* Animation */
-  box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+  /* box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5); */
   padding-bottom: 1%;
   margin-top: 1%;
   align-items: center;
@@ -178,9 +190,9 @@ body {
   transform: scale(1.1);
 }
 
-.card-info:hover {
+/* .card-info:hover {
   transform: scale(1.1);
-}
+} */
 
 .card-title {
   padding-top: 1%;
