@@ -9,8 +9,8 @@
 #define WLBawah 8
 
 #define relayBawahIN1 7 // 2
-#define relayBawahIN2 3 // 3
-#define relayBawahIN3 6 // 6
+#define relayBawahIN2 6 // 3
+#define relayBawahIN3 3 // 6
 #define relayBawahIN4 2 // 7
 #define relayAtasIN1  4 // 4
 #define relayAtasIN2  5 // 5
@@ -34,21 +34,28 @@ String area2    = "L2";
 String area3    = "L3";
 String area4    = "L4";
 String message  = "";
-String statusSensorsOn = "ON";
-String statusSensorsOff = "OFF";
+//String statusSensorsOn = "1";
+//String statusSensorsOff = "2";
 //String statusAllSensors = "";
 
 int WLBawahRead, WLAtasRead;
-
+unsigned char data[4] = {};
+float distance, distances;
 String dataReciver;
 
-const byte onHour   = 13;
-const byte onMin    = 40;
-const byte offHour  = 13;
-const byte offMin   = 43;
+const byte onHour   = 00;
+const byte onMin    = 00;
+const byte offHour  = 00;
+const byte offMin   = 00;
+
+const byte onHour2   = 00;
+const byte onMin2    = 00;
+const byte offHour2  = 00;
+const byte offMin2   = 00;
 
 void setup()
 {
+  Serial2.begin(9600);
   Serial.begin (115200);
   Serial3.begin (9600); // 9600
   rtc.begin();
@@ -63,14 +70,23 @@ void setup()
   pinMode(relayAtasIN1, OUTPUT);
   pinMode(relayAtasIN2, OUTPUT);
 
-
-//  rtc.setTime(16, 00, 0);
-//  rtc.setDate(5, 11, 2022);
+  //
+  //    rtc.setTime(14, 35, 0);
+  //    rtc.setDate(18, 11, 2022);
 }
 
 void loop()
 {
+  /* ================= CAUTION ===============
+      THIS IS EXPERIMENTAL  FEATURE!, CHECK THIS SCRIPT IF FIND SOME PROBLEM OR ERROR */
+  //Serial.println(statusSensorsOn);
+  //Serial.print('#');
+  //Serial.println(statusSensorsOff);
+  //Serial.print('#');
 
+
+
+  ultrasonikSensor();
   //  Serial.println("data Receiver :");
   //  dataReciver = Serial3.readString();
   if (Serial3.available())
@@ -84,11 +100,11 @@ void loop()
 
   }
 
-  if (readSensorMillis >= readSensorInterval)
-  {
-   reservoirRelayOutput();
-    readSensorMillis = 0;
-  }
+  //  if (readSensorMillis >= readSensorInterval)
+  //  {
+  //    reservoirRelayOutput();
+  //    readSensorMillis = 0;
+  //  }
 
   if (areaRelayOutputMillis >= areaRelayOutputInterval)
   {
@@ -99,23 +115,30 @@ void loop()
     areaRelayOutputMillis = 0;
   }
 
-  if (reservoirRelayOutputMillis >= reservoirRelayOutputInterval)
-  {
-    reservoirRelayOutput();
-    reservoirRelayOutputMillis = 0;
-  }
+  //  if (reservoirRelayOutputMillis >= reservoirRelayOutputInterval)
+  //  {
+  //    reservoirRelayOutput();
+  //    reservoirRelayOutputMillis = 0;
+  //  }
 
-  if (RTCMillis >= RTCInterval)
-  {
-//    areaRelayOutput()
-    RTCRead (moist1, relayBawahIN1);
-    RTCRead (moist2, relayBawahIN2);
-    RTCRead (moist3, relayBawahIN3);
-    RTCRead (moist4, relayBawahIN4);
-    RTCMillis = 0;
-  }
+  //  if (RTCMillis >= RTCInterval)
+  //  {
+  //
+  //    RTCRead (moist1, relayBawahIN1);
+  //    RTCRead (moist2, relayBawahIN2);
+  //    RTCRead (moist3, relayBawahIN3);
+  //    RTCRead (moist4, relayBawahIN4);
+  //    RTCMillis = 0;
+  //  }
+
+  rtcTesting();
 }
-
+void rtcTesting() {
+  RTCRead (moist1, relayBawahIN1);
+  RTCRead (moist2, relayBawahIN2);
+  RTCRead (moist3, relayBawahIN3);
+  RTCRead (moist4, relayBawahIN4);
+}
 
 void sensorMap (String area, String sensor)
 {
@@ -137,68 +160,160 @@ void sensorMap (String area, String sensor)
   }
 }
 
+void ultrasonikSensor() {
+  do {
+    for (int i = 0; i < 4; i++)
+    {
+      data[i] = Serial2.read();
+    }
+  } while (Serial2.read() == 0xff);
+
+  Serial2.flush();
+
+  if (data[0] == 0xff)
+  {
+    int sum;
+    sum = (data[0] + data[1] + data[2]) & 0x00FF;
+    if (sum == data[3])
+    {
+      distance = (data[1] << 8) + data[2];
+      // convert to cm
+
+      if (distance > 3)
+      {
+        distances = distance / 10;
+        if (distances < 10) {
+          digitalWrite(relayAtasIN2, HIGH);
+          digitalWrite(relayAtasIN1, LOW);
+          Serial.println("Jarak : ");
+          Serial.println(distances);
+          Serial.println("Penuh");
+        }
+        else if (distances >= 180) {
+          digitalWrite(relayAtasIN2, LOW);
+          digitalWrite(relayAtasIN1, HIGH);
+          Serial.println("Jarak : ");
+          Serial.println(distances);
+          Serial.println("KOSONG");
+        }
+      }
+      else
+      {
+        Serial.println("too much");
+      }
+    } else Serial.println("ERROR");
+  }
+  delay(100);
+
+}
 
 void areaRelayOutput (String moistValue, int relayArea, String area)
 {
   int moistPercentA = moistValue.toInt();
-  Serial.print(area +" = ");
+  Serial.print(area + " = ");
   Serial.println(moistPercentA);
 
-  if (moistPercentA >= 5 && moistPercentA <= 40)
+  if (moistPercentA >= 1 && moistPercentA <= 40)
   {
     //Turn ON Designated Area Relay
     digitalWrite(relayArea, LOW); //high
-//    Serial.println(statusSensorsOn);
+    //    Serial.println(statusSensorsOn);
   }
-  else if (moistPercentA >= 70) {
+  else if (moistPercentA >= 41) {
     digitalWrite(relayArea, HIGH); // low
 
   }
-
-
 }
 
-void reservoirRelayOutput ()
-{
-   WLAtasRead    = digitalRead (WLAtas);
-  WLBawahRead   = digitalRead (WLBawah);
-  if (WLBawahRead == 0)
-  {
-    //Turn OFF Pump and Strobe
-    digitalWrite(relayAtasIN1,LOW);
-    Serial.println("Status : Pompa Nyala");
-    digitalWrite(relayAtasIN2, LOW);
-  }
-  else if (WLAtasRead == 1) {
-    digitalWrite(relayAtasIN1, HIGH);
-    Serial.println("Status : Pompa Mati");
-    digitalWrite(relayAtasIN2, HIGH);
-  }
-//  else {
-//    //Turn ON Pump and Strobe
+//void reservoirRelayOutput ()
+//{
+//  WLAtasRead    = digitalRead (WLAtas);
+//  WLBawahRead   = digitalRead (WLBawah);
+//    if (WLBawahRead == 0)
+//    {
+//      //Turn OFF Pump and Strobe
+//      Serial.println("Status : Pompa Nyala");
+//      digitalWrite(relayAtasIN2, HIGH);
+//      digitalWrite(relayAtasIN1, LOW);
+//    }
+//    else if (WLAtasRead == 1) {
+//      Serial.println("Status : Pompa Mati");
+//      digitalWrite(relayAtasIN2, LOW);
+//      digitalWrite(relayAtasIN1, HIGH);
+//    }
+//    else {
+//      //Turn ON Pump and Strobe
+//      digitalWrite(relayAtasIN1, LOW);
+//      Serial.println("Value WLBawah : HIGH");
+//      digitalWrite(relayAtasIN2, HIGH);
+//    }
+
+//WaterPump
+//  if (WLBawahRead == 0 || WLAtasRead == 0) {
+//    Serial.println("Status : Proses Pengisian");
+//    digitalWrite(relayAtasIN2, LOW);
 //    digitalWrite(relayAtasIN1, LOW);
-//    Serial.println("Value WLBawah : HIGH");
+//  } else if (WLBawahRead == 1 || WLAtasRead == 0) {
+//    Serial.println("Status : Proses Pengisian1");
+//    digitalWrite(relayAtasIN2, LOW);
+//    digitalWrite(relayAtasIN1, LOW);
+//  } else if (WLAtasRead == 1 || WLBawahRead == 1) {
+//    Serial.println("Status : Pengisian Full");
 //    digitalWrite(relayAtasIN2, HIGH);
+//    digitalWrite(relayAtasIN1, HIGH);
 //  }
 
-
-}
+//}
 void RTCRead(String moistValue, int relayArea)
 {
   t = rtc.getTime();
-  
-//  int moistPercentB = moistValue.toInt(); // use if need soil value
 
-  
-    if (t.hour == onHour && t.min == onMin)
-    {
+  int jam = t.hour;
+  int menit =  t.min;
+  Serial.println(jam);
+  Serial.println(menit);
+
+  int jamPenyiraman1 = t.hour == onHour;
+  int menitPenyiraman1 = t.min == onMin;
+  int jamPenyiraman2  =t.hour == onHour2;
+  int menitPenyiraman2 = t.min == onHour2;
+
+  int moistPercentB = moistValue.toInt(); // use if need soil value
+  if (jamPenyiraman1 && menitPenyiraman1) {
+    if (moistPercentB == 0) {
       digitalWrite(relayArea, HIGH);
       Serial.println("RTC ON");
+      Serial.println("Penyiraman Ke 1");
+      //Turn ON Designated Area Relay
+      //    Serial.println(statusSensorsOn);
     }
-    else if (t.hour == offHour && t.min == offMin)
-    {
-      digitalWrite(relayArea, LOW);
-      Serial.println("RTC OFF");
-    }
+
+  }
+  else if (t.hour == offHour && t.min == offMin)
+  {
+    //Turn ON Designated Area Relay
+    digitalWrite(relayArea, LOW); //high
+    Serial.println("RTC OFF");
+    Serial.println("Penyiraman Ke 1");
+    //    Serial.println(statusSensorsOn);
+  }
+
+  if (jamPenyiraman2 && menitPenyiraman2)
+  {
+   if (moistPercentB == 0) {
+      digitalWrite(relayArea, HIGH);
+      Serial.println("RTC ON");
+      Serial.println("Penyiraman Ke 2 ON");
   
+  }
+  }
+  else if (t.hour == offHour2 && t.min == offMin2) {
+    digitalWrite(relayArea, LOW);
+    Serial.println("RTC OFF");
+    Serial.println("Penyiraman Ke 2 Mati");
+  
+  }
+
+
+
 }
