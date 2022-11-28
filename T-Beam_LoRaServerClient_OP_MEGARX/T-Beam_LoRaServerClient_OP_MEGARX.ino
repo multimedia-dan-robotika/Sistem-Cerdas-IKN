@@ -161,6 +161,7 @@ void sensorMap (String area, String sensor)
 }
 
 void ultrasonikSensor() {
+  int tAir,tToren;
   do {
     for (int i = 0; i < 4; i++)
     {
@@ -177,29 +178,31 @@ void ultrasonikSensor() {
     if (sum == data[3])
     {
       distance = (data[1] << 8) + data[2];
-      // convert to cm
 
       if (distance > 3)
       {
-        distances = distance / 10;
-        if (distances < 10) {
+        distances = distance / 10; // convert to CM
+        tAir = tToren - distances; // rumus 
+        if (tAir > 10) {
           digitalWrite(relayAtasIN2, HIGH);
           digitalWrite(relayAtasIN1, LOW);
           Serial.println("Jarak : ");
           Serial.println(distances);
+          Serial.println(tAir);
           Serial.println("Penuh");
         }
-        else if (distances >= 180) {
+        else if (tAir =< 180) {
           digitalWrite(relayAtasIN2, LOW);
           digitalWrite(relayAtasIN1, HIGH);
           Serial.println("Jarak : ");
           Serial.println(distances);
+                    Serial.println(tAir);
           Serial.println("KOSONG");
         }
       }
       else
       {
-        Serial.println("too much");
+        Serial.println("Not Detected!");
       }
     } else Serial.println("ERROR");
   }
